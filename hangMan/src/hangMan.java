@@ -2,18 +2,43 @@ import java.io.*;
 import java.util.*;
 
 public class hangMan {
+    /**
+     * Determines if a user is still guessing a word
+     */
     static boolean keepPlaying;
+
+    /**
+     * Determines if a user will keep on playing
+     */
     static boolean gameOver;
 
+    /**
+     * Number of guesses guessed correctly by user
+     */
     static int correctGuesses;
+
+    /**
+     * Number of guesses guessed incorrectly by user
+     */
     static int incorrectGuesses;
+
+    /**
+     * Number of letters guessed so far
+     */
     static int numLettersGuessed = 0;
+
+    /**
+     * Total number of letters to be guessed
+     */
     static int numLettersToGuess = 0;
 
+    /**
+     * The actual word being guessed
+     */
     static StringBuilder randomWord;
 
     public static void main(String[] args) throws FileNotFoundException {
-        Map<Integer, StringBuilder> dictionaryWords = new HashMap<>();
+        Map<Integer, StringBuilder> dictionaryWords;
         String DICTIONARY_NAME = "words.txt";
 
         System.out.println("Hello user! Welcome to Hangman");
@@ -28,6 +53,8 @@ public class hangMan {
             willPlayAgain();            //  asks user to play again
         }
     }
+
+
 
     /**
      * Asks user if he/she wants to play again
@@ -52,6 +79,11 @@ public class hangMan {
         }
     }
 
+
+    /**
+     * Sets up a new game ot be started
+     * @param dictionaryWords list of words to be potentially guessed
+     */
     private static void setupGame(Map<Integer, StringBuilder> dictionaryWords) {
         setRandomWord(getRandomWord(dictionaryWords));
         setNumLettersToGuess(getRandomWord().length());
@@ -60,6 +92,7 @@ public class hangMan {
         setCorrectGuesses(0);
         setIncorrectGuesses(0);
     }
+
 
     /**
      * Starts a new game
@@ -76,11 +109,12 @@ public class hangMan {
 
         // Game core
         keepPlaying = true;
-        while(keepPlaying) {
+        while(isKeepPlaying()) {
             playGameHelper(partiallyConstructedWord, lettersGuessed);
         }
 
     }
+
 
     /**
      * Plays the actual game.
@@ -94,7 +128,7 @@ public class hangMan {
         Scanner myScanner = new Scanner(System.in);
 
         //  Print partially constructed word
-        printPlayWord(getRandomWord(), partiallyConstructedWord, lettersGuessed);
+        printGameUpdate(partiallyConstructedWord, lettersGuessed);
 
         //  Get input from user
         boolean passed = false;
@@ -118,7 +152,7 @@ public class hangMan {
                     System.out.println("'" + guess + "'" + " was not found in the word");
                 }
 
-                updateConstructedWord(randomWord, partiallyConstructedWord, guess);
+                updateConstructedWord(partiallyConstructedWord, guess);
                 System.out.println("\nGuesses made: [Correct=" + getCorrectGuesses() +
                         ", Incorrect=" + getIncorrectGuesses() + "]");
 
@@ -150,27 +184,34 @@ public class hangMan {
         return letterFound;
     }
 
-    private static void updateConstructedWord(StringBuilder randomWord, StringBuilder partiallyConstructedWord, char guess) {
+    /**
+     * Updates a blank space in the partially constructed word
+     * with a letter that was correctly guessed
+     * @param partiallyConstructedWord word partially guessed
+     * @param guess user guess
+     */
+    private static void updateConstructedWord(StringBuilder partiallyConstructedWord, char guess) {
 
-        for(int i = 0; i < randomWord.length(); i++) {
-            if(randomWord.charAt(i) == guess) {
+        for(int i = 0; i < getRandomWord().length(); i++) {
+            if(getRandomWord().charAt(i) == guess) {
                 partiallyConstructedWord.setCharAt(i, guess);
                 numLettersGuessed++;
             }
         }
     }
 
+
     /**
      * Prints the partially constructed word
-     * @param randomWord word to be guessed
      * @param partiallyConstructedWord word getting constructed
      * @param lettersGuessed list of letters that have been guessed
      */
-    private static void printPlayWord(StringBuilder randomWord, StringBuilder partiallyConstructedWord, Set<Character> lettersGuessed) {
+    private static void printGameUpdate(StringBuilder partiallyConstructedWord, Set<Character> lettersGuessed) {
         System.out.print("Letters guessed:");
         printLettersGuessed(lettersGuessed);
         System.out.println(partiallyConstructedWord);
     }
+
 
     /**
      * Print letters that has been guessed
@@ -192,12 +233,9 @@ public class hangMan {
     private static StringBuilder hideWord(StringBuilder randomWord) {
         StringBuilder hiddenWord = new StringBuilder();
         char theChar = '-';
-        for(int i = 0; i < randomWord.length(); i++) {
-            hiddenWord.append(theChar);
-        }
+        hiddenWord.append(String.valueOf(theChar).repeat(Math.max(0, randomWord.length())));
         return hiddenWord;
     }
-
 
 
     /**
@@ -210,7 +248,6 @@ public class hangMan {
         int randomIndex = random.nextInt(dictionaryWords.size() - 1);
         return dictionaryWords.get(randomIndex);
     }
-
 
 
     /**
@@ -233,8 +270,6 @@ public class hangMan {
         }
         return dictionaryWords;
     }
-
-
 
 
     /** Getters and Setters **/
